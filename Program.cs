@@ -1,14 +1,33 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using TronApiApp.Models;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options => {});
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Dotnet API", Description = "Null", Version = "v1" });
+});
+
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+   app.UseSwagger();
+   app.UseSwaggerUI(c =>
+   {
+      c.SwaggerEndpoint("/swagger/v1/swagger.json", "Dotnet API V1");
+   });
+}
 
 HttpClient http = new HttpClient
 {
     BaseAddress = new Uri("https://api.shasta.trongrid.io")
 };
+
 
 app.MapGet("/", () => "Hello World!");
 
