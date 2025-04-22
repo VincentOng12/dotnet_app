@@ -11,6 +11,7 @@ builder.Services.AddSwaggerGen(c =>
 {
      c.SwaggerDoc("v1", new OpenApiInfo { Title = "Dotnet API", Description = "Null", Version = "v1" });
 });
+builder.Configuration.AddJsonFile("appsettings.json", optional: true).AddEnvironmentVariables();
 
 var app = builder.Build();
 

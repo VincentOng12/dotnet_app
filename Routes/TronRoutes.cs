@@ -1,6 +1,7 @@
 namespace TronApiApp.Routes;
 
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 using TronApiApp.Models;
 
@@ -10,15 +11,17 @@ public static class TronRoutes
     {
         var group = routes.MapGroup("/tron");
 
-        const string BaseUrl = "https://api.shasta.trongrid.io";
+        var configuration = routes.ServiceProvider.GetRequiredService<IConfiguration>();
+        var BaseUrl = configuration["Tron:BaseUrl"] ?? "https://api.shasta.trongrid.io";
         
-        group.MapPost("/account", async (TronRequest request, HttpClient http) =>
+        group.MapPost("/account", async (AccountRequest request, HttpClient http) =>
         {
             if (string.IsNullOrWhiteSpace(request.Address))
                 return Results.BadRequest(new { error = "Missing address" });
 
             try
             {
+                
                 var result = await http.GetFromJsonAsync<JsonElement>($"{BaseUrl}/v1/accounts/{request.Address}");
                 return Results.Json(result);
             }
@@ -28,14 +31,15 @@ public static class TronRoutes
             }
         });
 
-        group.MapPost("/account/transactions", async (TronRequest request, HttpClient http) =>
+        group.MapPost("/account/transactions", async (TransactionRequest request, HttpClient http) =>
         {
             if (string.IsNullOrWhiteSpace(request.Address))
                 return Results.BadRequest(new { error = "Missing address" });
 
             try
             {
-                var result = await http.GetFromJsonAsync<JsonElement>($"{BaseUrl}/v1/accounts/{request.Address}/transactions");
+                var limit = request.Limit;
+                var result = await http.GetFromJsonAsync<JsonElement>($"{BaseUrl}/v1/accounts/{request.Address}/transactions?limit={limit}");
                 return Results.Json(result);
             }
             catch (Exception ex)
@@ -44,14 +48,15 @@ public static class TronRoutes
             }
         });
 
-        group.MapPost("/account/trc20", async (TronRequest request, HttpClient http) =>
+        group.MapPost("/account/trc20", async (TrcRequest request, HttpClient http) =>
         {
             if (string.IsNullOrWhiteSpace(request.Address))
                 return Results.BadRequest(new { error = "Missing address" });
 
             try
             {
-                var result = await http.GetFromJsonAsync<JsonElement>($"{BaseUrl}/v1/accounts/{request.Address}/transactions/trc20");
+                var limit = request.Limit;
+                var result = await http.GetFromJsonAsync<JsonElement>($"{BaseUrl}/v1/accounts/{request.Address}/transactions/trc20?limit={limit}");
                 return Results.Json(result);
             }
             catch (Exception ex)
